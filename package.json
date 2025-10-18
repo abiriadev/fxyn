@@ -1,4 +1,12 @@
 {
+	"name": "fxyn",
+	"version": "0.1.0",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "swc src -d dist --strip-leading-paths",
+		"build:type": "tsc"
+	},
 	"devDependencies": {
 		"prettier": "^3.6.2",
 		"typescript": "^5.9.3",

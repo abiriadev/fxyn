@@ -1,0 +1,255 @@
+{
+	"meta": {
+		"generatedAt": "2025-10-18T10:30:00Z",
+		"version": "demo-1.0",
+		"source": "fxyn/examples/demo.json"
+	},
+	"users": [
+		{
+			"id": "user_001",
+			"name": "Ava Robinson",
+			"email": "ava.robinson@example.com",
+			"createdAt": "2024-07-12T08:15:30Z",
+			"isActive": true,
+			"profile": {
+				"phone": "+1-415-555-0134",
+				"address": {
+					"line1": "210 Market St",
+					"line2": "Apt 4B",
+					"city": "San Francisco",
+					"state": "CA",
+					"postalCode": "94105",
+					"country": "US"
+				},
+				"preferences": {
+					"currency": "USD",
+					"newsletter": false,
+					"categories": ["electronics", "home"]
+				}
+			}
+		},
+		{
+			"id": "user_002",
+			"name": "Diego Martinez",
+			"email": "diego.martinez@example.com",
+			"createdAt": "2023-11-02T14:02:10Z",
+			"isActive": true,
+			"profile": {
+				"phone": "+34-91-555-2211",
+				"address": {
+					"line1": "Calle Gran Via 28",
+					"city": "Madrid",
+					"postalCode": "28013",
+					"country": "ES"
+				},
+				"preferences": {
+					"currency": "EUR",
+					"newsletter": true,
+					"categories": ["books", "gaming"]
+				}
+			}
+		},
+		{
+			"id": "user_003",
+			"name": "Samir Patel",
+			"email": "samir.patel@example.com",
+			"createdAt": "2025-01-09T19:45:00Z",
+			"isActive": false,
+			"profile": {
+				"phone": null,
+				"address": null,
+				"preferences": {
+					"currency": "USD",
+					"newsletter": false,
+					"categories": []
+				}
+			}
+		}
+	],
+	"products": [
+		{
+			"id": "prod_1001",
+			"sku": "EB-1001",
+			"title": "Aurora Noise-Cancelling Headphones",
+			"category": "electronics",
+			"price": 199.99,
+			"currency": "USD",
+			"inStock": 42,
+			"tags": ["audio", "wireless", "noise-canceling"],
+			"images": [
+				"https://cdn.example.com/products/eb-1001/1.jpg",
+				"https://cdn.example.com/products/eb-1001/2.jpg"
+			],
+			"rating": 4.6,
+			"reviews": [
+				{
+					"userId": "user_001",
+					"rating": 5,
+					"title": "Great sound, comfy fit",
+					"body": "Battery life is excellent and the noise cancellation works well on flights.",
+					"createdAt": "2025-06-10T09:12:00Z"
+				}
+			]
+		},
+		{
+			"id": "prod_2002",
+			"sku": "BK-2002",
+			"title": "Functional Programming in Practice",
+			"category": "books",
+			"price": 39.5,
+			"currency": "USD",
+			"inStock": 120,
+			"tags": ["programming", "functional", "education"],
+			"images": ["https://cdn.example.com/products/bk-2002/cover.jpg"],
+			"rating": 4.8,
+			"reviews": [
+				{
+					"userId": "user_002",
+					"rating": 5,
+					"title": "Excellent depth and examples",
+					"body": "Clear explanations with practical exercises.",
+					"createdAt": "2024-12-05T11:20:00Z"
+				}
+			]
+		},
+		{
+			"id": "prod_3003",
+			"sku": "HM-3003",
+			"title": "Bamboo Cutting Board - Large",
+			"category": "home",
+			"price": 24.0,
+			"currency": "USD",
+			"inStock": 0,
+			"tags": ["kitchen", "eco-friendly"],
+			"images": [],
+			"rating": 4.2,
+			"reviews": []
+		},
+		{
+			"id": "prod_4004",
+			"sku": "GM-4004",
+			"title": "Arcade-style Wireless Controller",
+			"category": "gaming",
+			"price": 59.99,
+			"currency": "USD",
+			"inStock": 15,
+			"tags": ["gaming", "wireless", "accessory"],
+			"images": ["https://cdn.example.com/products/gm-4004/1.png"],
+			"rating": 4.4,
+			"reviews": []
+		}
+	],
+	"orders": [
+		{
+			"id": "ord_9001",
+			"userId": "user_001",
+			"createdAt": "2025-09-28T16:05:00Z",
+			"status": "shipped",
+			"shipping": {
+				"method": "Standard",
+				"cost": 7.5,
+				"address": {
+					"line1": "210 Market St",
+					"line2": "Apt 4B",
+					"city": "San Francisco",
+					"state": "CA",
+					"postalCode": "94105",
+					"country": "US"
+				},
+				"trackingNumber": "1Z999AA10123456784"
+			},
+			"items": [
+				{
+					"productId": "prod_1001",
+					"quantity": 1,
+					"unitPrice": 199.99,
+					"currency": "USD"
+				},
+				{
+					"productId": "prod_3003",
+					"quantity": 1,
+					"unitPrice": 24.0,
+					"currency": "USD"
+				}
+			],
+			"subtotal": 223.99,
+			"tax": 18.95,
+			"total": 250.44,
+			"payment": {
+				"method": "card",
+				"cardBrand": "Visa",
+				"last4": "4242",
+				"paidAt": "2025-09-28T16:06:10Z"
+			}
+		},
+		{
+			"id": "ord_9002",
+			"userId": "user_002",
+			"createdAt": "2025-03-11T08:30:00Z",
+			"status": "delivered",
+			"shipping": {
+				"method": "Express",
+				"cost": 15.0,
+				"address": {
+					"line1": "Calle Gran Via 28",
+					"city": "Madrid",
+					"postalCode": "28013",
+					"country": "ES"
+				},
+				"trackingNumber": "ESX123456789"
+			},
+			"items": [
+				{
+					"productId": "prod_2002",
+					"quantity": 2,
+					"unitPrice": 39.5,
+					"currency": "USD"
+				}
+			],
+			"subtotal": 79.0,
+			"tax": 6.32,
+			"total": 100.32,
+			"payment": {
+				"method": "paypal",
+				"transactionId": "PAYID-XYZ-123",
+				"paidAt": "2025-03-11T08:31:00Z"
+			}
+		},
+		{
+			"id": "ord_9003",
+			"userId": "user_003",
+			"createdAt": "2025-02-20T12:00:00Z",
+			"status": "cancelled",
+			"shipping": null,
+			"items": [
+				{
+					"productId": "prod_4004",
+					"quantity": 1,
+					"unitPrice": 59.99,
+					"currency": "USD"
+				}
+			],
+			"subtotal": 59.99,
+			"tax": 4.8,
+			"total": 64.79,
+			"payment": {
+				"method": "card",
+				"cardBrand": "Mastercard",
+				"last4": "3333",
+				"paidAt": null
+			},
+			"cancelReason": "Customer requested cancellation before fulfillment"
+		}
+	],
+	"settings": {
+		"siteName": "Fxyn Demo Store",
+		"defaultCurrency": "USD",
+		"supportedCurrencies": ["USD", "EUR", "GBP"],
+		"maintenanceMode": false,
+		"features": {
+			"reviewsEnabled": true,
+			"guestCheckout": true,
+			"multiCurrencyPricing": true
+		}
+	}
+}
