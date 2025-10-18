@@ -79,4 +79,9 @@ export const notOneOf = (charClass: string) =>
 			: 1,
 	)
 
-export const until = (char: string) => repeat0(notChar(char))
+export const until = (endsWith: string) =>
+	p('until', ([source, index]) => {
+		const nextIndex = source.indexOf(endsWith, index)
+		if (nextIndex === -1) return null
+		return nextIndex - index
+	})
