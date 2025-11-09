@@ -6,14 +6,14 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "swc src -d dist --strip-leading-paths",
-		"build:type": "tsc"
+		"build:type": "tsc -b tsconfig.src.json"
 	},
 	"devDependencies": {
-		"prettier": "^3.6.2",
-		"typescript": "^5.9.3",
-		"@types/node": "^24.7.2",
-		"tsx": "^4.20.6",
+		"@swc/cli": "^0.7.8",
 		"@swc/core": "^1.13.5",
-		"@swc/cli": "^0.7.8"
+		"@types/node": "^24.7.2",
+		"prettier": "^3.6.2",
+		"tsx": "^4.20.6",
+		"typescript": "^5.9.3"
 	}
 }

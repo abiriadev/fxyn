@@ -1,9 +1,7 @@
 {
-	"extends": "./tsconfig.base.json",
-	"compilerOptions": {
-		"outDir": "dist",
-		"declaration": true,
-		"emitDeclarationOnly": true
-	},
-	"include": ["src"]
+	"files": [],
+	"references": [
+		{ "path": "./tsconfig.src.json" },
+		{ "path": "./tsconfig.examples.json" }
+	]
 }
