@@ -1,19 +1,9 @@
 {
+	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"target": "es2024",
-		"module": "preserve",
-		"paths": {
-			"@/*": ["./src/*"]
-		},
-		"experimentalDecorators": true,
 		"outDir": "dist",
 		"declaration": true,
-		"emitDeclarationOnly": true,
-		"strict": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
-		"verbatimModuleSyntax": true,
-		"skipLibCheck": true
+		"emitDeclarationOnly": true
 	},
-	"include": ["src", "examples"]
+	"include": ["src"]
 }
