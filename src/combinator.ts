@@ -105,7 +105,10 @@ export const opt =
 	source =>
 		pattern(source) ?? newLeafMatchResult(source, 0)
 
-export const separatedBy = (item: Pattern, separator: Pattern) =>
+export const separatedBy0 = (item: Pattern, separator: Pattern) =>
+	seq(repeat0(seq(item, separator)), opt(item))
+
+export const separatedBy1 = (item: Pattern, separator: Pattern) =>
 	seq(item, repeat0(seq(separator, item)))
 
 export const char = (char: string): Pattern => {
