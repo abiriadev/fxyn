@@ -172,3 +172,9 @@ export const until =
 		if (nextIndex === -1) return null
 		return newLeafSuccessResult(source, nextIndex)
 	}
+
+export const eof: Pattern = source => {
+	if (source.isEmpty()) return newLeafSuccessResult(source, 0)
+
+	return null
+}
