@@ -10,7 +10,7 @@ import {
 	p,
 	type Pattern,
 	repeat0,
-	separatedBy,
+	separatedBy0,
 	seq,
 	spanHighlighterStream,
 	until,
@@ -45,9 +45,7 @@ let matchValue: Pattern = null!
 const matchArray = p('matchArray', source =>
 	seq(
 		char('['),
-		ws,
-		opt(separatedBy(matchValue, seq(ws, char(','), ws))),
-		ws,
+		opt(separatedBy0(matchValue, seq(char(',')))),
 		char(']'),
 	)(source),
 )
@@ -55,27 +53,29 @@ const matchArray = p('matchArray', source =>
 const matchObject = p('matchObject', source =>
 	seq(
 		char('{'),
-		ws,
 		opt(
-			separatedBy(
-				seq(matchString, ws, char(':'), ws, matchValue),
-				seq(ws, char(','), ws),
+			separatedBy0(
+				seq(ws, matchString, ws, char(':'), matchValue),
+				seq(char(',')),
 			),
 		),
-		ws,
 		char('}'),
 	)(source),
 )
 
 matchValue = p(
 	'matchValue',
-	alt(
-		matchNull,
-		matchBoolean,
-		matchNumber,
-		matchString,
-		matchArray,
-		matchObject,
+	seq(
+		ws,
+		alt(
+			matchNull,
+			matchBoolean,
+			matchNumber,
+			matchString,
+			matchArray,
+			matchObject,
+		),
+		ws,
 	),
 )
 
@@ -85,5 +85,5 @@ const source = SpannedString.from(jsonText)
 
 const matchResult = matchValue(source)
 
-// console.log(displayMatchResult(matchResult))
-console.log(spanHighlighterStream(matchResult)?.trim())
+console.log(displayMatchResult(matchResult))
+// console.log(spanHighlighterStream(matchResult)?.trim())
