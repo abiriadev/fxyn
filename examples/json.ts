@@ -1,78 +1,74 @@
 import { readFile } from 'node:fs/promises'
 import {
 	alt,
+	char,
+	charOneOf,
 	displayMatchResult,
-	IndexedString,
+	either,
 	match,
-	oneOf,
 	opt,
 	p,
-	Pattern,
+	type Pattern,
 	repeat0,
 	separatedBy,
 	seq,
 	spanHighlighterStream,
 	until,
 } from '../src/index'
+import { SpannedString } from '../src/spanned-string'
 
-const nonZeroDigit = alt(
-	match('1'),
-	match('2'),
-	match('3'),
-	match('4'),
-	match('5'),
-	match('6'),
-	match('7'),
-	match('8'),
-	match('9'),
+const nonZeroDigit = charOneOf('123456789')
+
+const zero = char('0')
+
+const digit = either(zero, nonZeroDigit)
+
+const matchNull = p('matchNull', match('null'))
+const matchTrue = p('matchTrue', match('true'))
+const matchFalse = p('matchFalse', match('false'))
+const matchBoolean = p('matchBoolean', either(matchTrue, matchFalse))
+
+const matchNumber = p(
+	'matchNumber',
+	seq(
+		opt(char('-')),
+		either(zero, seq(nonZeroDigit, repeat0(digit))),
+		opt(seq(char('.'), repeat0(digit))),
+	),
 )
+const matchString = p('matchString', seq(char('"'), until('"'), char('"')))
 
-const zero = match('0')
-
-const digit = alt(zero, nonZeroDigit)
-
-const matchNull = match('null')
-const matchTrue = match('true')
-const matchFalse = match('false')
-const matchBoolean = alt(matchTrue, matchFalse)
-
-const matchNumber = seq(
-	opt(match('-')),
-	alt(zero, seq(nonZeroDigit, repeat0(digit))),
-	opt(seq(match('.'), repeat0(digit))),
-)
-const matchString = seq(match('"'), until('"'), match('"'))
-
-const ws = repeat0(oneOf('\n\r\t '))
+const ws = p('ws', repeat0(charOneOf('\n\r\t ')))
 
 let matchValue: Pattern = null!
 
 const matchArray = p('matchArray', source =>
 	seq(
-		match('['),
+		char('['),
 		ws,
-		opt(separatedBy(matchValue, seq(ws, match(','), ws))),
+		opt(separatedBy(matchValue, seq(ws, char(','), ws))),
 		ws,
-		match(']'),
+		char(']'),
 	)(source),
 )
 
 const matchObject = p('matchObject', source =>
 	seq(
-		match('{'),
+		char('{'),
 		ws,
 		opt(
 			separatedBy(
-				seq(matchString, ws, match(':'), ws, matchValue),
-				seq(ws, match(','), ws),
+				seq(matchString, ws, char(':'), ws, matchValue),
+				seq(ws, char(','), ws),
 			),
 		),
 		ws,
-		match('}'),
+		char('}'),
 	)(source),
 )
 
-matchValue = p('matchValue', (source: IndexedString) =>
+matchValue = p(
+	'matchValue',
 	alt(
 		matchNull,
 		matchBoolean,
@@ -80,14 +76,14 @@ matchValue = p('matchValue', (source: IndexedString) =>
 		matchString,
 		matchArray,
 		matchObject,
-	)(source),
+	),
 )
 
 const jsonText = await readFile('./examples/demo.json', 'utf-8')
 
-const source: IndexedString = [jsonText, 0]
+const source = SpannedString.from(jsonText)
 
 const matchResult = matchValue(source)
 
-console.log(displayMatchResult(source, matchResult))
-// console.log(spanHighlighterStream(matchResult))
+// console.log(displayMatchResult(matchResult))
+console.log(spanHighlighterStream(matchResult)?.trim())
