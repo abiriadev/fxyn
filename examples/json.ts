@@ -23,39 +23,39 @@ const zero = char('0')
 
 const digit = either(zero, nonZeroDigit)
 
-const matchNull = p('matchNull', match('null'))
-const matchTrue = p('matchTrue', match('true'))
-const matchFalse = p('matchFalse', match('false'))
-const matchBoolean = p('matchBoolean', either(matchTrue, matchFalse))
+const matchNull = p('null', match('null'))
+const matchTrue = p('true', match('true'))
+const matchFalse = p('false', match('false'))
+const matchBoolean = p('boolean', either(matchTrue, matchFalse), true)
 
 const matchNumber = p(
-	'matchNumber',
+	'number',
 	seq(
 		opt(char('-')),
 		either(zero, seq(nonZeroDigit, repeat0(digit))),
 		opt(seq(char('.'), repeat0(digit))),
 	),
 )
-const matchString = p('matchString', seq(char('"'), until('"'), char('"')))
+const matchString = p('string', seq(char('"'), until('"'), char('"')))
 
-const ws = p('ws', repeat0(charOneOf('\n\r\t ')))
+const ws = p('ws', repeat0(charOneOf('\n\r\t ')), true)
 
-let matchValue: Pattern = null!
+let matchWsValue: Pattern = null!
 
-const matchArray = p('matchArray', source =>
+const matchArray = p('array', source =>
 	seq(
 		char('['),
-		opt(separatedBy0(matchValue, seq(char(',')))),
+		opt(separatedBy0(matchWsValue, seq(char(',')))),
 		char(']'),
 	)(source),
 )
 
-const matchObject = p('matchObject', source =>
+const matchObject = p('object', source =>
 	seq(
 		char('{'),
 		opt(
 			separatedBy0(
-				seq(ws, matchString, ws, char(':'), matchValue),
+				seq(ws, matchString, ws, char(':'), matchWsValue),
 				seq(char(',')),
 			),
 		),
@@ -63,27 +63,26 @@ const matchObject = p('matchObject', source =>
 	)(source),
 )
 
-matchValue = p(
-	'matchValue',
-	seq(
-		ws,
-		alt(
-			matchNull,
-			matchBoolean,
-			matchNumber,
-			matchString,
-			matchArray,
-			matchObject,
-		),
-		ws,
+const matchValue = p(
+	'value',
+	alt(
+		matchNull,
+		matchBoolean,
+		matchNumber,
+		matchString,
+		matchArray,
+		matchObject,
 	),
+	true,
 )
+
+matchWsValue = seq(ws, matchValue, ws)
 
 const jsonText = await readFile('./examples/demo.json', 'utf-8')
 
 const source = SpannedString.from(jsonText)
 
-const matchResult = matchValue(source)
+const matchResult = matchWsValue(source)
 
 console.log(displayMatchResult(matchResult))
-// console.log(spanHighlighterStream(matchResult)?.trim())
+console.log(spanHighlighterStream(matchResult)?.trim())
