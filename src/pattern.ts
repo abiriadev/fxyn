@@ -14,13 +14,14 @@ export type SuccessResult = {
 	rest: SpannedString
 }
 
-export const p = (name: string, pattern: Pattern) => {
+export const p = (name: string, pattern: Pattern, hidden = false) => {
 	const namedPattern: Pattern = source => {
 		const match = pattern(source)
 
 		if (match === null) return null
 
 		match.tree.name = name
+		match.tree.hidden = hidden
 		return match
 	}
 

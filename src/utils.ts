@@ -1,4 +1,4 @@
-import type { MatchResult } from './pattern'
+import type { MatchResult, SuccessResult } from './pattern'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'
 import type { Span } from './types'
@@ -13,7 +13,7 @@ export const escapeString = (str: string): string => {
 }
 
 // NOTE: this is a quick helper. it does not check slice validity and assumes that the caller already proved it.
-export const newLeafMatchResult = (
+export const newLeafSuccessResult = (
 	source: SpannedString,
 	consumed: number,
 ) => ({
@@ -22,41 +22,38 @@ export const newLeafMatchResult = (
 	rest: source.skip(consumed)!,
 })
 
+export const wrapSuccessResult = (matchResult: MatchResult) =>
+	matchResult !== null
+		? {
+				...matchResult,
+				tree: new Tree(matchResult.tree.spanned, [matchResult.tree]),
+			}
+		: null
+
 export const displayMatchResult = (matchResult: MatchResult) => {
 	if (matchResult === null) return 'parse failed'
 
-	const rec = (tree: Tree, depth = 0) => {
-		let str = ''
+	let str = ''
 
-		const { name, children, spanned } = tree
+	for (const [
+		{ name, spanned },
+		depth,
+	] of matchResult.tree.iterLeftNamedWithDepth())
+		str += `${'  '.repeat(depth)}${name ?? '(unnamed)'} (${spanned.span[0]} ${spanned.span[1]}) "${escapeString(spanned.window)}"\n`
 
-		str += `${name ?? '(unnamed)'} (${spanned.span[0]} ${spanned.span[1]}) "${escapeString(spanned.window)}"\n`
-
-		for (const child of children)
-			str += `${'  '.repeat(depth)}${rec(child, depth + 1)}`
-
-		return str
-	}
-
-	return rec(matchResult.tree)
+	return str
 }
 
 export const spanHighlighterStream = (matchResult: MatchResult) => {
 	if (matchResult === null) return
 
-	const rec = (tree: Tree) => {
-		const {
-			name,
-			spanned: { span },
-			children,
-		} = tree
+	let str = ``
 
-		let str = `${span[0]} ${span[1]} ${name}\n`
+	for (const {
+		name,
+		spanned: { span },
+	} of matchResult.tree.iterLeftNamed())
+		str += `${span[0]} ${span[1]} ${name}\n`
 
-		for (const child of children) str += rec(child)
-
-		return str
-	}
-
-	return rec(matchResult.tree)
+	return str
 }

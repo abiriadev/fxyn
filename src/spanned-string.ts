@@ -66,4 +66,9 @@ export class SpannedString {
 	isEmpty() {
 		return spanLength(this.span) === 0
 	}
+
+	// interop with template strings
+	toString() {
+		return this.window
+	}
 }

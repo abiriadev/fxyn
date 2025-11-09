@@ -1,12 +1,12 @@
 import { type Pattern } from './pattern'
 import { Tree } from './tree'
-import { newLeafMatchResult } from './utils'
+import { newLeafSuccessResult, wrapSuccessResult } from './utils'
 
 export const match =
 	(lit: string): Pattern =>
 	source =>
 		source.window.startsWith(lit)
-			? newLeafMatchResult(source, lit.length)
+			? newLeafSuccessResult(source, lit.length)
 			: null
 
 export const repeat0 =
@@ -85,7 +85,7 @@ export const alt =
 	source => {
 		for (const pattern of patterns) {
 			const match = pattern(source)
-			if (match !== null) return match
+			if (match !== null) return wrapSuccessResult(match)
 		}
 
 		return null
@@ -94,16 +94,16 @@ export const alt =
 export const either =
 	(pattern1: Pattern, pattern2: Pattern): Pattern =>
 	source => {
-		const match = pattern1(source)
-		if (match !== null) return match
+		const match1 = pattern1(source)
+		if (match1 !== null) return wrapSuccessResult(match1)
 
-		return pattern2(source)
+		return wrapSuccessResult(pattern2(source))
 	}
 
 export const opt =
 	(pattern: Pattern): Pattern =>
 	source =>
-		pattern(source) ?? newLeafMatchResult(source, 0)
+		wrapSuccessResult(pattern(source)) ?? newLeafSuccessResult(source, 0)
 
 export const separatedBy0 = (item: Pattern, separator: Pattern) =>
 	seq(repeat0(seq(item, separator)), opt(item))
@@ -122,7 +122,7 @@ export const char = (char: string): Pattern => {
 		if (sourceChar === undefined) return null
 		if (sourceChar !== char) return null
 
-		return newLeafMatchResult(source, 1)
+		return newLeafSuccessResult(source, 1)
 	}
 }
 
@@ -137,7 +137,7 @@ export const notChar = (char: string): Pattern => {
 		if (sourceChar === undefined) return null
 		if (sourceChar === char) return null
 
-		return newLeafMatchResult(source, 1)
+		return newLeafSuccessResult(source, 1)
 	}
 }
 
@@ -150,7 +150,7 @@ export const charOneOf =
 		if (sourceChar === undefined) return null
 		if (!charClass.split('').includes(sourceChar)) return null
 
-		return newLeafMatchResult(source, 1)
+		return newLeafSuccessResult(source, 1)
 	}
 
 export const charNoneOf =
@@ -162,7 +162,7 @@ export const charNoneOf =
 		if (sourceChar === undefined) return null
 		if (charClass.split('').includes(sourceChar)) return null
 
-		return newLeafMatchResult(source, 1)
+		return newLeafSuccessResult(source, 1)
 	}
 
 export const until =
@@ -170,5 +170,5 @@ export const until =
 	source => {
 		const nextIndex = source.window.indexOf(endsWith)
 		if (nextIndex === -1) return null
-		return newLeafMatchResult(source, nextIndex)
+		return newLeafSuccessResult(source, nextIndex)
 	}
