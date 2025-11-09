@@ -1,19 +1,36 @@
 import type { MatchResult } from './pattern'
-import type { IndexedString, Tree } from './types'
+import type { SpannedString } from './spanned-string'
+import { Tree } from './tree'
+import type { Span } from './types'
 
-export const displayMatchResult = (
-	[source, index]: IndexedString,
-	matchResult: MatchResult,
-) => {
+export const spanLength = (span: Span): number => span[1] - span[0]
+
+export const escapeString = (str: string): string => {
+	return str
+		.replaceAll('\n', '\\n')
+		.replaceAll('\r', '\\r')
+		.replaceAll('\t', '\\t')
+}
+
+// NOTE: this is a quick helper. it does not check slice validity and assumes that the caller already proved it.
+export const newLeafMatchResult = (
+	source: SpannedString,
+	consumed: number,
+) => ({
+	tree: Tree.newLeaf(source.take(consumed)!),
+	consumed,
+	rest: source.skip(consumed)!,
+})
+
+export const displayMatchResult = (matchResult: MatchResult) => {
 	if (matchResult === null) return 'parse failed'
-
-	const sourceStr = source.slice(index)
 
 	const rec = (tree: Tree, depth = 0) => {
 		let str = ''
-		const [[nodeName, start, end], children] = tree
 
-		str += `${nodeName} (${start} ${end}) "${sourceStr.slice(start, end)}"\n`
+		const { name, children, spanned } = tree
+
+		str += `${name ?? '(unnamed)'} (${spanned.span[0]} ${spanned.span[1]}) "${escapeString(spanned.window)}"\n`
 
 		for (const child of children)
 			str += `${'  '.repeat(depth)}${rec(child, depth + 1)}`
@@ -28,9 +45,13 @@ export const spanHighlighterStream = (matchResult: MatchResult) => {
 	if (matchResult === null) return
 
 	const rec = (tree: Tree) => {
-		const [[nodeName, start, end], children] = tree
+		const {
+			name,
+			spanned: { span },
+			children,
+		} = tree
 
-		let str = `${start} ${end} ${nodeName}\n`
+		let str = `${span[0]} ${span[1]} ${name}\n`
 
 		for (const child of children) str += rec(child)
 

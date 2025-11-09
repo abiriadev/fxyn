@@ -1,33 +1,30 @@
-import type { IndexedString, Tree } from './types'
+import type { SpannedString } from './spanned-string'
+import { Tree } from './tree'
 
-export type RawPattern = (
-	source: IndexedString,
-) => number | MatchResult[] | MatchResult | null
+export interface Pattern {
+	(source: SpannedString): MatchResult
+	p?: string
+}
 
-export type MatchResult = { tree: Tree; consumed: number; rest: IndexedString }
+export type MatchResult = SuccessResult | null
 
-export type Pattern = (source: IndexedString) => MatchResult | null
+export type SuccessResult = {
+	tree: Tree
+	consumed: number
+	rest: SpannedString
+}
 
-export const p = (name: string, rawPattern: RawPattern): Pattern => {
-	return ([source, index]) => {
-		const match = rawPattern([source, index])
+export const p = (name: string, pattern: Pattern) => {
+	const namedPattern: Pattern = source => {
+		const match = pattern(source)
 
 		if (match === null) return null
-		if (typeof match === 'number')
-			return {
-				tree: [[name, index, index + match], []],
-				consumed: match,
-				rest: [source, index + match],
-			}
-		if (!Array.isArray(match)) return match
 
-		const trees = match.map(({ tree }) => tree)
-		const newIndex = trees.at(-1)?.[0]?.[2] ?? index
-
-		return {
-			tree: [[name, index, newIndex], trees],
-			consumed: newIndex - index,
-			rest: [source, newIndex],
-		}
+		match.tree.name = name
+		return match
 	}
+
+	namedPattern.p = name
+
+	return namedPattern
 }

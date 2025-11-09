@@ -1,4 +1,5 @@
 export * from './types'
+export * from './tree'
 export * from './pattern'
 export * from './combinator'
 export * from './utils'

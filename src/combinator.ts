@@ -1,87 +1,171 @@
-import { p, type MatchResult, type Pattern } from './pattern'
+import { type Pattern } from './pattern'
+import { Tree } from './tree'
+import { newLeafMatchResult } from './utils'
 
-export const match = (lit: string) =>
-	p('lit', ([source, index]) =>
-		source.slice(index).startsWith(lit) ? lit.length : null,
-	)
+export const match =
+	(lit: string): Pattern =>
+	source =>
+		source.window.startsWith(lit)
+			? newLeafMatchResult(source, lit.length)
+			: null
 
-export const repeat0 = (pattern: Pattern) =>
-	p('repeat0', source => {
-		const matches: Array<MatchResult> = []
+export const repeat0 =
+	(pattern: Pattern): Pattern =>
+	source => {
+		const children: Array<Tree> = []
+		let consumed = 0
+		let rest = source
 
 		while (true) {
-			const match = pattern(source)
-			if (match === null) return matches
+			const match = pattern(rest)
+			if (match === null) break
 
-			matches.push(match)
-			source = match.rest
+			children.push(match.tree)
+			consumed += match.consumed
+			rest = match.rest
 		}
-	})
 
-export const seq = (...patterns: Pattern[]) =>
-	p('seq', source => {
-		const matches: Array<MatchResult> = []
+		return {
+			tree: new Tree(source.take(consumed)!, children),
+			consumed,
+			rest,
+		}
+	}
+
+export const repeat1 =
+	(pattern: Pattern): Pattern =>
+	source => {
+		const match = pattern(source)
+		if (match === null) return null
+
+		const children = [match.tree]
+		let { consumed, rest } = match
+
+		while (true) {
+			const match = pattern(rest)
+			if (match === null) break
+
+			children.push(match.tree)
+			consumed += match.consumed
+			rest = match.rest
+		}
+
+		return {
+			tree: new Tree(source.take(consumed)!, children),
+			consumed,
+			rest,
+		}
+	}
+
+export const seq =
+	(...patterns: Pattern[]): Pattern =>
+	source => {
+		const children: Array<Tree> = []
+		let consumed = 0
+		let rest = source
 
 		for (const pattern of patterns) {
-			const match = pattern(source)
+			const match = pattern(rest)
 			if (match === null) return null
 
-			matches.push(match)
-			source = match.rest
+			children.push(match.tree)
+			consumed += match.consumed
+			rest = match.rest
 		}
 
-		return matches
-	})
+		return {
+			tree: new Tree(source.take(consumed)!, children),
+			consumed,
+			rest,
+		}
+	}
 
-export const alt = (...patterns: Pattern[]) =>
-	p('alt', source => {
+export const alt =
+	(...patterns: Pattern[]): Pattern =>
+	source => {
 		for (const pattern of patterns) {
 			const match = pattern(source)
 			if (match !== null) return match
 		}
 
 		return null
-	})
+	}
 
-export const either = (pattern1: Pattern, pattern2: Pattern) =>
-	p('either', source => {
+export const either =
+	(pattern1: Pattern, pattern2: Pattern): Pattern =>
+	source => {
 		const match = pattern1(source)
 		if (match !== null) return match
 
 		return pattern2(source)
-	})
+	}
 
-export const opt = (pattern: Pattern) =>
-	p('opt', source => {
-		const match = pattern(source)
-		return match === null ? 0 : match
-	})
+export const opt =
+	(pattern: Pattern): Pattern =>
+	source =>
+		pattern(source) ?? newLeafMatchResult(source, 0)
 
 export const separatedBy = (item: Pattern, separator: Pattern) =>
 	seq(item, repeat0(seq(separator, item)))
 
-export const notChar = (char: string) => {
+export const char = (char: string): Pattern => {
+	if (char.length !== 1)
+		throw new Error('char only accepts a single character')
+
+	return source => {
+		const sourceChar = source.index(0)
+
+		// char always consumes one character. if the source is empty, the match fails
+		if (sourceChar === undefined) return null
+		if (sourceChar !== char) return null
+
+		return newLeafMatchResult(source, 1)
+	}
+}
+
+export const notChar = (char: string): Pattern => {
 	if (char.length !== 1)
 		throw new Error('notChar only accepts a single character')
 
-	const pattern = match(char)
+	return source => {
+		const sourceChar = source.index(0)
 
-	return p('notChar', source => (pattern(source) === null ? 1 : null))
+		// notChar always consumes one character. if the source is empty, the match fails
+		if (sourceChar === undefined) return null
+		if (sourceChar === char) return null
+
+		return newLeafMatchResult(source, 1)
+	}
 }
 
-export const oneOf = (charClass: string) =>
-	p('oneOf', source => alt(...charClass.split('').map(_ => match(_)))(source))
+export const charOneOf =
+	(charClass: string): Pattern =>
+	source => {
+		const sourceChar = source.index(0)
 
-export const notOneOf = (charClass: string) =>
-	p('notOneOf', ([source, index]) =>
-		!source[index] || charClass.split('').includes(source[index])
-			? null
-			: 1,
-	)
+		// charOneOf always consumes one character. if the source is empty, the match fails
+		if (sourceChar === undefined) return null
+		if (!charClass.split('').includes(sourceChar)) return null
 
-export const until = (endsWith: string) =>
-	p('until', ([source, index]) => {
-		const nextIndex = source.indexOf(endsWith, index)
+		return newLeafMatchResult(source, 1)
+	}
+
+export const charNoneOf =
+	(charClass: string): Pattern =>
+	source => {
+		const sourceChar = source.index(0)
+
+		// charNoneOf always consumes one character. if the source is empty, the match fails
+		if (sourceChar === undefined) return null
+		if (charClass.split('').includes(sourceChar)) return null
+
+		return newLeafMatchResult(source, 1)
+	}
+
+export const until =
+	(endsWith: string): Pattern =>
+	source => {
+		const nextIndex = source.window.indexOf(endsWith)
 		if (nextIndex === -1) return null
-		return nextIndex - index
-	})
+		return newLeafMatchResult(source, nextIndex)
+	}
