@@ -373,3 +373,21 @@ export const eof: Pattern = source => {
 
 	return null
 }
+
+export const lookahead =
+	(pattern: Pattern, lookahead: Pattern): Pattern =>
+	source => {
+		const lookaheadMatch = lookahead(source)
+		if (lookaheadMatch === null) return null
+
+		return pattern(source)
+	}
+
+export const negativeLookahead =
+	(pattern: Pattern, lookahead: Pattern): Pattern =>
+	source => {
+		const lookaheadMatch = lookahead(source)
+		if (lookaheadMatch !== null) return null
+
+		return pattern(source)
+	}
