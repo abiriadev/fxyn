@@ -24,6 +24,14 @@ export class Tree {
 		this.hidden = hidden
 	}
 
+	get isTerminal() {
+		return this.children.length === 0
+	}
+
+	get isNamed() {
+		return this.name !== null && !this.hidden
+	}
+
 	// dfs.
 	// start visiting from the leftmost leaf, then go to right siblings, then go to parent.
 	iterLeft(): Iterable<Tree> {
