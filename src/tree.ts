@@ -1,23 +1,58 @@
+import { defaultIdGenerator, type IdGenerator } from './id-generator'
 import type { SpannedString } from './spanned-string'
 
 export class Tree {
-	name: string | null
+	id: number
 
+	name: string | null
 	spanned: SpannedString
 	children: Tree[]
 
 	hidden: boolean
 
-	static newLeaf(spanned: SpannedString, name: string | null = null) {
-		return new Tree(spanned, [], name)
-	}
-
-	constructor(
+	static newTree(
 		spanned: SpannedString,
 		children: Tree[],
 		name: string | null = null,
-		hidden = false,
+		opt?: {
+			hidden?: boolean
+			idGenerator?: IdGenerator
+		},
 	) {
+		return new Tree(
+			(opt?.idGenerator ?? defaultIdGenerator).next(),
+			name,
+			spanned,
+			children,
+			opt?.hidden ?? false,
+		)
+	}
+
+	static newLeaf(
+		spanned: SpannedString,
+		name: string | null = null,
+		opt?: {
+			hidden?: boolean
+			idGenerator?: IdGenerator
+		},
+	) {
+		return new Tree(
+			(opt?.idGenerator ?? defaultIdGenerator).next(),
+			name,
+			spanned,
+			[],
+			opt?.hidden ?? false,
+		)
+	}
+
+	constructor(
+		id: number,
+		name: string | null,
+		spanned: SpannedString,
+		children: Tree[],
+		hidden: boolean,
+	) {
+		this.id = id
 		this.name = name
 		this.spanned = spanned
 		this.children = children
