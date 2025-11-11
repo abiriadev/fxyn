@@ -32,7 +32,7 @@ export const repeat0 =
 		}
 
 		return {
-			tree: new Tree(source.take(consumed)!, children),
+			tree: Tree.newTree(source.take(consumed)!, children),
 			consumed,
 			rest,
 		}
@@ -57,7 +57,7 @@ export const repeat1 =
 		}
 
 		return {
-			tree: new Tree(source.take(consumed)!, children),
+			tree: Tree.newTree(source.take(consumed)!, children),
 			consumed,
 			rest,
 		}
@@ -80,7 +80,7 @@ export const seq =
 		}
 
 		return {
-			tree: new Tree(source.take(consumed)!, children),
+			tree: Tree.newTree(source.take(consumed)!, children),
 			consumed,
 			rest,
 		}

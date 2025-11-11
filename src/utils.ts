@@ -26,7 +26,9 @@ export const wrapSuccessResult = (matchResult: MatchResult) =>
 	matchResult !== null
 		? {
 				...matchResult,
-				tree: new Tree(matchResult.tree.spanned, [matchResult.tree]),
+				tree: Tree.newTree(matchResult.tree.spanned, [
+					matchResult.tree,
+				]),
 			}
 		: null
 
