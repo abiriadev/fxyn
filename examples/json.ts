@@ -10,8 +10,8 @@ import {
 	separatedBy0,
 	seq,
 	until,
+	SpannedString,
 } from '../src/index'
-import { SpannedString } from '../src/spanned-string'
 
 const matchNull = p('null', 'null')
 const matchTrue = p('true', 'true')
