@@ -31,4 +31,13 @@ export const p = (name: string, pattern: Pattern, hidden = false) => {
 	return namedPattern
 }
 
-export const toPattern = (from: string) => matchString(from)
+type PatternLike = Pattern | string
+
+export const toPattern = (from: PatternLike) =>
+	typeof from === 'string' ? matchString(from) : from
+
+// allow combinator to support `PatternLike` types, like raw string.
+export const wrapPatternLike =
+	<T extends Array<Pattern>, U>(combinator: (...patterns: T) => U) =>
+	(...patternLikes: { [K in keyof T]: PatternLike }) =>
+		combinator(...(patternLikes.map(toPattern) as T))
