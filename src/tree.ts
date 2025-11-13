@@ -134,4 +134,19 @@ export class Tree {
 			},
 		}
 	}
+
+	projectToNamed(): Tree {
+		const children = []
+
+		for (const child of this.children) {
+			const projectedChild = child.projectToNamed()
+
+			if (projectedChild.isNamed) children.push(projectedChild)
+			else children.push(...projectedChild.children)
+		}
+
+		return this.extend({
+			children,
+		})
+	}
 }
