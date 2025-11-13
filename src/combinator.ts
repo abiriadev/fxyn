@@ -1,4 +1,4 @@
-import { type Pattern } from './pattern'
+import { wrapPatternLike, type Pattern } from './pattern'
 import { Tree } from './tree'
 import { newLeafSuccessResult, wrapSuccessResult } from './utils'
 
@@ -33,107 +33,118 @@ export const matchRegex = (re: RegExp): Pattern => {
 	}
 }
 
-export const repeat0 =
+export const repeat0 = wrapPatternLike(
 	(pattern: Pattern): Pattern =>
-	source => {
-		const children: Array<Tree> = []
-		let consumed = 0
-		let rest = source
+		source => {
+			const children: Array<Tree> = []
+			let consumed = 0
+			let rest = source
 
-		while (true) {
-			const match = pattern(rest)
-			if (match === null) break
+			while (true) {
+				const match = pattern(rest)
+				if (match === null) break
 
-			children.push(match.tree)
-			consumed += match.consumed
-			rest = match.rest
-		}
+				children.push(match.tree)
+				consumed += match.consumed
+				rest = match.rest
+			}
 
-		return {
-			tree: Tree.newTree(source.take(consumed)!, children),
-			consumed,
-			rest,
-		}
-	}
+			return {
+				tree: Tree.newTree(source.take(consumed)!, children),
+				consumed,
+				rest,
+			}
+		},
+)
 
-export const repeat1 =
+export const repeat1 = wrapPatternLike(
 	(pattern: Pattern): Pattern =>
-	source => {
-		const match = pattern(source)
-		if (match === null) return null
-
-		const children = [match.tree]
-		let { consumed, rest } = match
-
-		while (true) {
-			const match = pattern(rest)
-			if (match === null) break
-
-			children.push(match.tree)
-			consumed += match.consumed
-			rest = match.rest
-		}
-
-		return {
-			tree: Tree.newTree(source.take(consumed)!, children),
-			consumed,
-			rest,
-		}
-	}
-
-export const seq =
-	(...patterns: Pattern[]): Pattern =>
-	source => {
-		const children: Array<Tree> = []
-		let consumed = 0
-		let rest = source
-
-		for (const pattern of patterns) {
-			const match = pattern(rest)
+		source => {
+			const match = pattern(source)
 			if (match === null) return null
 
-			children.push(match.tree)
-			consumed += match.consumed
-			rest = match.rest
-		}
+			const children = [match.tree]
+			let { consumed, rest } = match
 
-		return {
-			tree: Tree.newTree(source.take(consumed)!, children),
-			consumed,
-			rest,
-		}
-	}
+			while (true) {
+				const match = pattern(rest)
+				if (match === null) break
 
-export const alt =
+				children.push(match.tree)
+				consumed += match.consumed
+				rest = match.rest
+			}
+
+			return {
+				tree: Tree.newTree(source.take(consumed)!, children),
+				consumed,
+				rest,
+			}
+		},
+)
+
+export const seq = wrapPatternLike(
 	(...patterns: Pattern[]): Pattern =>
-	source => {
-		for (const pattern of patterns) {
-			const match = pattern(source)
-			if (match !== null) return wrapSuccessResult(match)
-		}
+		source => {
+			const children: Array<Tree> = []
+			let consumed = 0
+			let rest = source
 
-		return null
-	}
+			for (const pattern of patterns) {
+				const match = pattern(rest)
+				if (match === null) return null
 
-export const either =
+				children.push(match.tree)
+				consumed += match.consumed
+				rest = match.rest
+			}
+
+			return {
+				tree: Tree.newTree(source.take(consumed)!, children),
+				consumed,
+				rest,
+			}
+		},
+)
+
+export const alt = wrapPatternLike(
+	(...patterns: Pattern[]): Pattern =>
+		source => {
+			for (const pattern of patterns) {
+				const match = pattern(source)
+				if (match !== null) return wrapSuccessResult(match)
+			}
+
+			return null
+		},
+)
+
+export const either = wrapPatternLike(
 	(pattern1: Pattern, pattern2: Pattern): Pattern =>
-	source => {
-		const match1 = pattern1(source)
-		if (match1 !== null) return wrapSuccessResult(match1)
+		source => {
+			const match1 = pattern1(source)
+			if (match1 !== null) return wrapSuccessResult(match1)
 
-		return wrapSuccessResult(pattern2(source))
-	}
+			return wrapSuccessResult(pattern2(source))
+		},
+)
 
-export const opt =
+export const opt = wrapPatternLike(
 	(pattern: Pattern): Pattern =>
-	source =>
-		wrapSuccessResult(pattern(source)) ?? newLeafSuccessResult(source, 0)
+		source =>
+			wrapSuccessResult(pattern(source)) ??
+			newLeafSuccessResult(source, 0),
+)
 
-export const separatedBy0 = (item: Pattern, separator: Pattern) =>
-	seq(repeat0(seq(item, separator)), opt(item))
+export const separatedBy0 = wrapPatternLike(
+	(item: Pattern, separator: Pattern) =>
+		seq(repeat0(seq(item, separator)), opt(item)),
+)
 
-export const separatedBy1 = (item: Pattern, separator: Pattern) =>
-	seq(item, repeat0(seq(separator, item)))
+export const separatedBy1 = wrapPatternLike(
+	(item: Pattern, separator: Pattern) =>
+		seq(item, repeat0(seq(separator, item))),
+)
 
 export const char = (char: string): Pattern => {
 	if (char.length !== 1)
@@ -392,20 +403,22 @@ export const eof: Pattern = source => {
 	return null
 }
 
-export const lookahead =
+export const lookahead = wrapPatternLike(
 	(pattern: Pattern, lookahead: Pattern): Pattern =>
-	source => {
-		const lookaheadMatch = lookahead(source)
-		if (lookaheadMatch === null) return null
+		source => {
+			const lookaheadMatch = lookahead(source)
+			if (lookaheadMatch === null) return null
 
-		return pattern(source)
-	}
+			return pattern(source)
+		},
+)
 
-export const negativeLookahead =
+export const negativeLookahead = wrapPatternLike(
 	(pattern: Pattern, lookahead: Pattern): Pattern =>
-	source => {
-		const lookaheadMatch = lookahead(source)
-		if (lookaheadMatch !== null) return null
+		source => {
+			const lookaheadMatch = lookahead(source)
+			if (lookaheadMatch !== null) return null
 
-		return pattern(source)
-	}
+			return pattern(source)
+		},
+)
