@@ -2,14 +2,15 @@ import { readFile } from 'node:fs/promises'
 import {
 	alt,
 	char,
-	charOneOf,
+	charOneOfRepeat0,
+	charRange,
+	charRangeRepeat0,
 	displayMatchResult,
 	either,
 	match,
 	opt,
 	p,
-	type Pattern,
-	repeat0,
+	rec,
 	separatedBy0,
 	seq,
 	spanHighlighterStream,
@@ -17,11 +18,12 @@ import {
 } from '../src/index'
 import { SpannedString } from '../src/spanned-string'
 
-const nonZeroDigit = charOneOf('123456789')
+const nonZeroDigit = charRange('1', '9')
 
 const zero = char('0')
 
 const digit = either(zero, nonZeroDigit)
+const digits = charRangeRepeat0('0', '9')
 
 const matchNull = p('null', match('null'))
 const matchTrue = p('true', match('true'))
@@ -32,51 +34,56 @@ const matchNumber = p(
 	'number',
 	seq(
 		opt(char('-')),
-		either(zero, seq(nonZeroDigit, repeat0(digit))),
-		opt(seq(char('.'), repeat0(digit))),
+		either(zero, seq(nonZeroDigit, digits)),
+		opt(seq(char('.'), digits)),
 	),
 )
 const matchString = p('string', seq(char('"'), until('"'), char('"')))
 
-const ws = p('ws', repeat0(charOneOf('\n\r\t ')), true)
+const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
 
-let matchWsValue: Pattern = null!
-
-const matchArray = p('array', source =>
-	seq(
-		char('['),
-		opt(separatedBy0(matchWsValue, seq(char(',')))),
-		char(']'),
-	)(source),
-)
-
-const matchObject = p('object', source =>
-	seq(
-		char('{'),
-		opt(
-			separatedBy0(
-				seq(ws, matchString, ws, char(':'), matchWsValue),
-				seq(char(',')),
+const { matchArray, matchObject, matchValue, matchWsValue } = rec({
+	matchArray: $ =>
+		p(
+			'array',
+			seq(
+				char('['),
+				opt(separatedBy0($.matchWsValue, seq(char(',')))),
+				char(']'),
 			),
 		),
-		char('}'),
-	)(source),
-)
 
-const matchValue = p(
-	'value',
-	alt(
-		matchNull,
-		matchBoolean,
-		matchNumber,
-		matchString,
-		matchArray,
-		matchObject,
-	),
-	true,
-)
+	matchObject: $ =>
+		p(
+			'object',
+			seq(
+				char('{'),
+				opt(
+					separatedBy0(
+						seq(ws, matchString, ws, char(':'), $.matchWsValue),
+						seq(char(',')),
+					),
+				),
+				char('}'),
+			),
+		),
 
-matchWsValue = seq(ws, matchValue, ws)
+	matchValue: $ =>
+		p(
+			'value',
+			alt(
+				matchNull,
+				matchBoolean,
+				matchNumber,
+				matchString,
+				$.matchArray,
+				$.matchObject,
+			),
+			true,
+		),
+
+	matchWsValue: $ => seq(ws, $.matchValue, ws),
+})
 
 const jsonText = await readFile('./examples/demo.json', 'utf-8')
 
