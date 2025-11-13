@@ -1,7 +1,8 @@
-import type { MatchResult, SuccessResult } from './pattern'
+import type { MatchResult, Pattern, SuccessResult } from './pattern'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'
 import type { Span } from './types'
+import { mapValues } from 'es-toolkit'
 
 export const spanLength = (span: Span): number => span[1] - span[0]
 
@@ -10,6 +11,20 @@ export const escapeString = (str: string): string => {
 		.replaceAll('\n', '\\n')
 		.replaceAll('\r', '\\r')
 		.replaceAll('\t', '\\t')
+}
+
+type PatternMap = Record<string, Pattern>
+
+export const rec = (
+	recDef: Record<string, (pm: PatternMap) => Pattern>,
+): PatternMap => {
+	const patternMap = mapValues(
+		recDef,
+		patternFactory => (source: SpannedString) =>
+			patternFactory(patternMap)(source),
+	)
+
+	return patternMap
 }
 
 // NOTE: this is a quick helper. it does not check slice validity and assumes that the caller already proved it.
