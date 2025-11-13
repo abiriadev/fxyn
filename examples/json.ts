@@ -1,39 +1,24 @@
 import { readFile } from 'node:fs/promises'
 import {
 	alt,
-	char,
 	charOneOfRepeat0,
-	charRange,
-	charRangeRepeat0,
 	displayMatchResult,
 	either,
-	opt,
+	match,
 	p,
 	rec,
 	separatedBy0,
 	seq,
-	spanHighlighterStream,
 	until,
 } from '../src/index'
 import { SpannedString } from '../src/spanned-string'
-
-const nonZeroDigit = charRange('1', '9')
-
-const digits = charRangeRepeat0('0', '9')
 
 const matchNull = p('null', 'null')
 const matchTrue = p('true', 'true')
 const matchFalse = p('false', 'false')
 const matchBoolean = p('boolean', either(matchTrue, matchFalse), true)
 
-const matchNumber = p(
-	'number',
-	seq(
-		opt('-'),
-		either('0', seq(nonZeroDigit, digits)),
-		opt(seq('.', digits)),
-	),
-)
+const matchNumber = p('number', match(/^-?(0|[1-9]\d*)(\.\d+)?/))
 const matchString = p('string', seq('"', until('"'), '"'))
 
 const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
@@ -79,4 +64,4 @@ const source = SpannedString.from(jsonText)
 const matchResult = matchWsValue(source)
 
 console.log(displayMatchResult(matchResult))
-console.log(spanHighlighterStream(matchResult)?.trim())
+// console.log(spanHighlighterStream(matchResult)?.trim())
