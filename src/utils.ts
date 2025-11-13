@@ -25,26 +25,6 @@ export const rec = <T extends string>(
 	return patternMap
 }
 
-// NOTE: this is a quick helper. it does not check slice validity and assumes that the caller already proved it.
-export const newLeafSuccessResult = (
-	source: SpannedString,
-	consumed: number,
-) => ({
-	tree: Tree.newLeaf(source.take(consumed)!),
-	consumed,
-	rest: source.skip(consumed)!,
-})
-
-export const wrapSuccessResult = (matchResult: MatchResult) =>
-	matchResult !== null
-		? {
-				...matchResult,
-				tree: Tree.newTree(matchResult.tree.spanned, [
-					matchResult.tree,
-				]),
-			}
-		: null
-
 export const displayMatchResult = (matchResult: MatchResult) => {
 	if (matchResult === null) return 'parse failed'
 
