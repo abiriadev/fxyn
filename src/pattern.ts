@@ -1,3 +1,4 @@
+import { matchString } from './combinator'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'
 
@@ -29,3 +30,5 @@ export const p = (name: string, pattern: Pattern, hidden = false) => {
 
 	return namedPattern
 }
+
+export const toPattern = (from: string) => matchString(from)
