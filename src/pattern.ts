@@ -15,9 +15,11 @@ export type SuccessResult = {
 	rest: SpannedString
 }
 
-export const p = (name: string, pattern: Pattern, hidden = false) => {
+export const p = (name: string, pattern: PatternLike, hidden = false) => {
+	const resolvedPattern = toPattern(pattern)
+
 	const namedPattern: Pattern = source => {
-		const match = pattern(source)
+		const match = resolvedPattern(source)
 
 		if (match === null) return null
 
