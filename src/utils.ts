@@ -1,4 +1,4 @@
-import type { MatchResult, Pattern, SuccessResult } from './pattern'
+import type { MatchResult, Pattern } from './pattern'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'
 import type { Span } from './types'
