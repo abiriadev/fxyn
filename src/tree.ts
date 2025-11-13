@@ -67,6 +67,23 @@ export class Tree {
 		return this.name !== null && !this.hidden
 	}
 
+	// create a new tree based on this tree with some fields replaced.
+	extend({
+		name = this.name,
+		spanned = this.spanned,
+		children = this.children,
+		hidden = this.hidden,
+		idGenerator = defaultIdGenerator,
+	}: {
+		name?: string | null
+		spanned?: SpannedString
+		children?: Tree[]
+		hidden?: boolean
+		idGenerator?: IdGenerator
+	}) {
+		return Tree.newTree(spanned, children, name, { hidden, idGenerator })
+	}
+
 	// dfs.
 	// start visiting from the leftmost leaf, then go to right siblings, then go to parent.
 	iterLeft(): Iterable<Tree> {
