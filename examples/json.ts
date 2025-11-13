@@ -7,7 +7,6 @@ import {
 	charRangeRepeat0,
 	displayMatchResult,
 	either,
-	match,
 	opt,
 	p,
 	rec,
@@ -20,51 +19,39 @@ import { SpannedString } from '../src/spanned-string'
 
 const nonZeroDigit = charRange('1', '9')
 
-const zero = char('0')
-
-const digit = either(zero, nonZeroDigit)
 const digits = charRangeRepeat0('0', '9')
 
-const matchNull = p('null', match('null'))
-const matchTrue = p('true', match('true'))
-const matchFalse = p('false', match('false'))
+const matchNull = p('null', 'null')
+const matchTrue = p('true', 'true')
+const matchFalse = p('false', 'false')
 const matchBoolean = p('boolean', either(matchTrue, matchFalse), true)
 
 const matchNumber = p(
 	'number',
 	seq(
-		opt(char('-')),
-		either(zero, seq(nonZeroDigit, digits)),
-		opt(seq(char('.'), digits)),
+		opt('-'),
+		either('0', seq(nonZeroDigit, digits)),
+		opt(seq('.', digits)),
 	),
 )
-const matchString = p('string', seq(char('"'), until('"'), char('"')))
+const matchString = p('string', seq('"', until('"'), '"'))
 
 const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
 
 const { matchArray, matchObject, matchValue, matchWsValue } = rec({
 	matchArray: $ =>
-		p(
-			'array',
-			seq(
-				char('['),
-				opt(separatedBy0($.matchWsValue, seq(char(',')))),
-				char(']'),
-			),
-		),
+		p('array', seq('[', separatedBy0($.matchWsValue, seq(',')), ']')),
 
 	matchObject: $ =>
 		p(
 			'object',
 			seq(
-				char('{'),
-				opt(
-					separatedBy0(
-						seq(ws, matchString, ws, char(':'), $.matchWsValue),
-						seq(char(',')),
-					),
+				'{',
+				separatedBy0(
+					seq(ws, matchString, ws, ':', $.matchWsValue),
+					',',
 				),
-				char('}'),
+				'}',
 			),
 		),
 
