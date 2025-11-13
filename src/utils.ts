@@ -13,11 +13,9 @@ export const escapeString = (str: string): string => {
 		.replaceAll('\t', '\\t')
 }
 
-type PatternMap = Record<string, Pattern>
-
-export const rec = (
-	recDef: Record<string, (pm: PatternMap) => Pattern>,
-): PatternMap => {
+export const rec = <T extends string>(
+	recDef: Record<T, (pm: Record<T, Pattern>) => Pattern>,
+): Record<T, Pattern> => {
 	const patternMap = mapValues(
 		recDef,
 		patternFactory => (source: SpannedString) =>
