@@ -49,13 +49,38 @@ export const displayMatchResult = (matchResult: MatchResult) => {
 export const spanHighlighterStream = (matchResult: MatchResult) => {
 	if (matchResult === null) return
 
-	let str = ``
+	let str = matchResult.tree.spanned.source
+
+	str += `\n${'='.repeat(10)}\n`
 
 	for (const {
 		name,
 		spanned: { span },
 	} of matchResult.tree.iterLeftNamed())
 		str += `${span[0]} ${span[1]} ${name}\n`
+
+	return str
+}
+
+const treeToMmdId = (tree: Tree) => `n_${tree.id}`
+
+export const renderMermaid = (matchResult: MatchResult) => {
+	if (matchResult === null) return
+
+	let str = `flowchart TD\n`
+
+	for (const [tree, depth] of matchResult.tree.iterLeftWithDepth()) {
+		const nodeId = treeToMmdId(tree)
+		const label = tree.name ?? '(unnamed)'
+		str += `${nodeId}["${label}<br>(${tree.spanned.span[0]}, ${tree.spanned.span[1]})${
+			tree.isTerminal ? `<br><code>${tree.spanned.window}</code>` : ``
+		}"]\n`
+
+		for (const child of tree.children) {
+			const childId = treeToMmdId(child)
+			str += `${nodeId} --> ${childId}\n`
+		}
+	}
 
 	return str
 }
