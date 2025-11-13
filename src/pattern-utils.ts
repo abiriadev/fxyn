@@ -1,4 +1,4 @@
-import { matchString } from './match'
+import { matchString } from './combinators/match'
 import type { MatchResult, Pattern } from './pattern'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'

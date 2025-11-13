@@ -1,5 +1,5 @@
-import type { Pattern } from './pattern'
-import { newLeafSuccessResult } from './pattern-utils'
+import type { Pattern } from '@/pattern'
+import { newLeafSuccessResult } from '@/pattern-utils'
 
 export const match = (pattern: string | RegExp) =>
 	typeof pattern === 'string' ? matchString(pattern) : matchRegex(pattern)
