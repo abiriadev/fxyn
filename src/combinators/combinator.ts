@@ -161,3 +161,36 @@ export const negativeLookahead = wrapPatternLike(
 			return pattern(source)
 		},
 )
+
+export const assocLeft = wrapPatternLike(
+	(item: Pattern, extra: Pattern): Pattern =>
+		source => {
+			// A ::= A item | extra
+			// -> turn into
+			// extra (item extra)*
+
+			const extraMatch = extra(source)
+			if (extraMatch === null) return null
+
+			let { tree, rest, consumed } = extraMatch
+
+			while (true) {
+				const itemMatch = item(rest)
+				if (itemMatch === null) break
+
+				consumed += itemMatch.consumed
+				rest = itemMatch.rest
+
+				tree = Tree.newTree(source.take(consumed)!, [
+					tree,
+					itemMatch.tree,
+				])
+			}
+
+			return {
+				tree,
+				consumed,
+				rest,
+			}
+		},
+)
