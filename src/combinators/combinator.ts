@@ -187,10 +187,54 @@ export const assocLeft = wrapPatternLike(
 				])
 			}
 
-			return {
-				tree,
-				consumed,
-				rest,
+			return tree !== extraMatch.tree
+				? {
+						tree,
+						consumed,
+						rest,
+					}
+				: wrapSuccessResult(extraMatch)
+		},
+)
+
+export const assocRight = wrapPatternLike(
+	(item: Pattern, extra: Pattern): Pattern =>
+		source => {
+			// A ::= item A | extra
+			// -> turn into
+			// item* extra
+
+			const items: Array<Tree> = []
+			let consumed = 0
+			let rest = source
+
+			while (true) {
+				const itemMatch = item(rest)
+				if (itemMatch === null) break
+
+				items.push(itemMatch.tree)
+				consumed += itemMatch.consumed
+				rest = itemMatch.rest
 			}
+
+			const extraMatch = extra(rest)
+			if (extraMatch === null) return null
+
+			consumed += extraMatch.consumed
+			rest = extraMatch.rest
+
+			// building right associative tree
+			let tree = extraMatch.tree
+			for (let i = items.length - 1; i >= 0; i--) {
+				tree = Tree.newTree(source.take(consumed)!, [items[i]!, tree])
+			}
+
+			return tree !== extraMatch.tree
+				? {
+						tree,
+						consumed,
+						rest,
+					}
+				: wrapSuccessResult(extraMatch)
 		},
 )
