@@ -1,8 +1,10 @@
 import type { Pattern } from '../pattern'
 import {
 	newLeafSuccessResult,
+	toPattern,
 	wrapPatternLike,
 	wrapSuccessResult,
+	type PatternLike,
 } from '../pattern-utils'
 import { Tree } from '../tree'
 
@@ -241,37 +243,45 @@ export const assocRight = wrapPatternLike(
 
 // binary left associativity.
 // <item> <mid> <item> ...
-export const assocBinLeft = wrapPatternLike(
-	(item: Pattern, mid: Pattern): Pattern =>
-		source => {
-			const firstItemMatch = item(source)
-			if (firstItemMatch === null) return null
+export const assocBinLeft =
+	(
+		item: PatternLike,
+		mid: PatternLike,
+		map?: (tree: Tree) => Tree,
+	): Pattern =>
+	source => {
+		// wrapPatternLike
+		const _item = toPattern(item)
+		const _mid = toPattern(mid)
 
-			let { tree, consumed, rest } = firstItemMatch
+		const firstItemMatch = _item(source)
+		if (firstItemMatch === null) return null
 
-			while (true) {
-				const midMatch = mid(rest)
-				if (midMatch === null) break
+		let { tree, consumed, rest } = firstItemMatch
 
-				const nextItemMatch = item(midMatch.rest)
-				if (nextItemMatch === null) break
+		while (true) {
+			const midMatch = _mid(rest)
+			if (midMatch === null) break
 
-				consumed += midMatch.consumed + nextItemMatch.consumed
-				rest = nextItemMatch.rest
+			const nextItemMatch = _item(midMatch.rest)
+			if (nextItemMatch === null) break
 
-				tree = Tree.newTree(source.take(consumed)!, [
+			consumed += midMatch.consumed + nextItemMatch.consumed
+			rest = nextItemMatch.rest
+
+			tree = Tree.newTree(source.take(consumed)!, [
+				tree,
+				midMatch.tree,
+				nextItemMatch.tree,
+			])
+			if (map) tree = map(tree)
+		}
+
+		return tree !== firstItemMatch.tree
+			? {
 					tree,
-					midMatch.tree,
-					nextItemMatch.tree,
-				])
-			}
-
-			return tree !== firstItemMatch.tree
-				? {
-						tree,
-						consumed,
-						rest,
-					}
-				: wrapSuccessResult(firstItemMatch)
-		},
-)
+					consumed,
+					rest,
+				}
+			: wrapSuccessResult(firstItemMatch)
+	}
