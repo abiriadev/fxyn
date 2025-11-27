@@ -238,3 +238,40 @@ export const assocRight = wrapPatternLike(
 				: wrapSuccessResult(extraMatch)
 		},
 )
+
+// binary left associativity.
+// <item> <mid> <item> ...
+export const assocBinLeft = wrapPatternLike(
+	(item: Pattern, mid: Pattern): Pattern =>
+		source => {
+			const firstItemMatch = item(source)
+			if (firstItemMatch === null) return null
+
+			let { tree, consumed, rest } = firstItemMatch
+
+			while (true) {
+				const midMatch = mid(rest)
+				if (midMatch === null) break
+
+				const nextItemMatch = item(midMatch.rest)
+				if (nextItemMatch === null) break
+
+				consumed += midMatch.consumed + nextItemMatch.consumed
+				rest = nextItemMatch.rest
+
+				tree = Tree.newTree(source.take(consumed)!, [
+					tree,
+					midMatch.tree,
+					nextItemMatch.tree,
+				])
+			}
+
+			return tree !== firstItemMatch.tree
+				? {
+						tree,
+						consumed,
+						rest,
+					}
+				: wrapSuccessResult(firstItemMatch)
+		},
+)
