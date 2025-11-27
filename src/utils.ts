@@ -65,9 +65,10 @@ export const renderMermaid = (matchResult: MatchResult) => {
 	for (const [tree, depth] of matchResult.tree.iterLeftWithDepth()) {
 		const nodeId = treeToMmdId(tree)
 		const label = tree.name ?? '(unnamed)'
-		str += `${nodeId}["${label}<br>(${tree.spanned.span[0]}, ${tree.spanned.span[1]})${
-			tree.isTerminal ? `<br><code>${tree.spanned.window}</code>` : ``
-		}"]\n`
+		str += `${nodeId}["${label}<br>(${tree.spanned.span[0]}, ${tree.spanned.span[1]})${tree.isTerminal
+				? `<br><code>${tree.spanned.window.replaceAll(`"`, ``)}</code>`
+				: ``
+			}"]\n`
 
 		for (const child of tree.children) {
 			const childId = treeToMmdId(child)
