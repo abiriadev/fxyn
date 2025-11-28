@@ -1,12 +1,17 @@
-import { matchString } from './combinators/match'
+import { matchRegex, matchString } from './combinators/match'
 import type { MatchResult, Pattern } from './pattern'
 import type { SpannedString } from './spanned-string'
 import { Tree } from './tree'
 
-export type PatternLike = Pattern | string
+export type PatternLike = Pattern | string | RegExp
 
+// convert various PatternLike to actual Pattern
 export const toPattern = (from: PatternLike) =>
-	typeof from === 'string' ? matchString(from) : from
+	typeof from === 'string'
+		? matchString(from)
+		: from instanceof RegExp
+			? matchRegex(from)
+			: from
 
 export const p = (name: string, pattern: PatternLike, hidden = false) => {
 	const resolvedPattern = toPattern(pattern)
