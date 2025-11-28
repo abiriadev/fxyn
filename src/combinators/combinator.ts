@@ -1,3 +1,4 @@
+import { identity } from 'es-toolkit'
 import type { Pattern } from '../pattern'
 import {
 	newLeafSuccessResult,
@@ -275,6 +276,76 @@ export const assocBinLeft =
 				nextItemMatch.tree,
 			])
 			if (map) tree = map(tree)
+		}
+
+		return tree !== firstItemMatch.tree
+			? {
+					tree,
+					consumed,
+					rest,
+				}
+			: wrapSuccessResult(firstItemMatch)
+	}
+
+// without map
+// assocBinLeftMap(
+// 	itemPattern,
+// 	plusSym,
+// 	minusSym,
+// )
+
+// with map
+// assocBinLeftMap(
+// 	itemPattern,
+// 	[plusSym, tree => transformPlus(tree)],
+// 	[minusSym, tree => transformMinus(tree)],
+// )
+export const assocBinLeftMap =
+	(
+		item: PatternLike,
+		...midMap: Array<PatternLike | [PatternLike, (tree: Tree) => Tree]>
+	): Pattern =>
+	source => {
+		// wrapPatternLike
+		item = toPattern(item)
+		const _midMap = midMap.map(m =>
+			Array.isArray(m)
+				? {
+						pattern: toPattern(m[0]),
+						map: m[1],
+					}
+				: {
+						pattern: toPattern(m),
+					},
+		)
+
+		const firstItemMatch = item(source)
+		if (firstItemMatch === null) return null
+
+		let { tree, consumed, rest } = firstItemMatch
+
+		rec: while (true) {
+			for (const { pattern: mid, map } of _midMap) {
+				const midMatch = mid(rest)
+				if (midMatch === null) continue
+
+				const nextItemMatch = item(midMatch.rest)
+				if (nextItemMatch === null) continue
+
+				consumed += midMatch.consumed + nextItemMatch.consumed
+				rest = nextItemMatch.rest
+
+				tree = Tree.newTree(source.take(consumed)!, [
+					tree,
+					midMatch.tree,
+					nextItemMatch.tree,
+				])
+				if (map) tree = map(tree)
+
+				continue rec
+			}
+
+			break
 		}
 
 		return tree !== firstItemMatch.tree
