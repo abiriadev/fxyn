@@ -278,6 +278,59 @@ export const assocBinLeft =
 			: wrapSuccessResult(firstItemMatch)
 	}
 
+// New: binary right associativity.
+// parses: <item> (<mid> <item>)...
+// builds right-associative tree: item0 mid0 (item1 mid1 (item2 ...))
+export const assocBinRight =
+	(
+		item: PatternLike,
+		mid: PatternLike,
+		map?: (tree: Tree) => Tree,
+	): Pattern =>
+	source => {
+		// wrapPatternLike
+		const _item = toPattern(item)
+		const _mid = toPattern(mid)
+
+		const firstItemMatch = _item(source)
+		if (firstItemMatch === null) return null
+
+		const mids: Array<Tree> = []
+		const items: Array<Tree> = []
+		let { consumed, rest } = firstItemMatch
+
+		// collect mid, item pairs
+		while (true) {
+			const midMatch = _mid(rest)
+			if (midMatch === null) break
+
+			const nextItemMatch = _item(midMatch.rest)
+			if (nextItemMatch === null) break
+
+			mids.push(midMatch.tree)
+			items.push(nextItemMatch.tree)
+			consumed += midMatch.consumed + nextItemMatch.consumed
+			rest = nextItemMatch.rest
+		}
+
+		// no mids => no change
+		if (mids.length === 0) return wrapSuccessResult(firstItemMatch)
+
+		// build right associative tree
+		let tree: Tree = items[items.length - 1]!
+		for (let i = mids.length - 1; i >= 0; i--) {
+			const left = i === 0 ? firstItemMatch.tree : items[i - 1]!
+			tree = Tree.newTree(source.take(consumed)!, [left, mids[i]!, tree])
+			if (map) tree = map(tree)
+		}
+
+		return {
+			tree,
+			consumed,
+			rest,
+		}
+	}
+
 // without map
 // assocBinLeftMap(
 // 	itemPattern,
@@ -346,4 +399,72 @@ export const assocBinLeftMap =
 					rest,
 				}
 			: wrapSuccessResult(firstItemMatch)
+	}
+
+// New: binary right associativity with multiple mid patterns (each may have its own map)
+export const assocBinRightMap =
+	(
+		item: PatternLike,
+		...midMap: Array<PatternLike | [PatternLike, (tree: Tree) => Tree]>
+	): Pattern =>
+	source => {
+		// wrapPatternLike
+		item = toPattern(item)
+		const _midMap = midMap.map(m =>
+			Array.isArray(m)
+				? {
+						pattern: toPattern(m[0]),
+						map: m[1],
+					}
+				: {
+						pattern: toPattern(m),
+					},
+		)
+
+		const firstItemMatch = item(source)
+		if (firstItemMatch === null) return null
+
+		const mids: Array<{ tree: Tree; map?: (t: Tree) => Tree }> = []
+		const items: Array<Tree> = []
+		let { consumed, rest } = firstItemMatch
+
+		// collect mid, item pairs using any matching mid from _midMap
+		collect: while (true) {
+			for (const { pattern: mid, map } of _midMap) {
+				const midMatch = mid(rest)
+				if (midMatch === null) continue
+
+				const nextItemMatch = item(midMatch.rest)
+				if (nextItemMatch === null) continue
+
+				mids.push({ tree: midMatch.tree, map })
+				items.push(nextItemMatch.tree)
+				consumed += midMatch.consumed + nextItemMatch.consumed
+				rest = nextItemMatch.rest
+
+				continue collect
+			}
+
+			break
+		}
+
+		if (mids.length === 0) return wrapSuccessResult(firstItemMatch)
+
+		// fold right, applying per-mid maps when building each node
+		let tree: Tree = items[items.length - 1]!
+		for (let i = mids.length - 1; i >= 0; i--) {
+			const left = i === 0 ? firstItemMatch.tree : items[i - 1]!
+			tree = Tree.newTree(source.take(consumed)!, [
+				left,
+				mids[i]!.tree,
+				tree,
+			])
+			if (mids[i]!.map) tree = mids[i]!.map!(tree)
+		}
+
+		return {
+			tree,
+			consumed,
+			rest,
+		}
 	}
