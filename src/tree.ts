@@ -83,14 +83,20 @@ export class Tree<T extends Meta = Meta> {
 		children = this.children,
 		hidden = this.hidden,
 		idGenerator = defaultIdGenerator,
+		meta = this.meta,
 	}: {
 		name?: string | null
 		spanned?: SpannedString
 		children?: Tree<Meta>[]
 		hidden?: boolean
 		idGenerator?: IdGenerator
+		meta?: T | null
 	}) {
-		return Tree.newTree<T>(spanned, children, name, { hidden, idGenerator })
+		return Tree.newTree<T>(spanned, children, name, {
+			hidden,
+			idGenerator,
+			meta: meta ?? undefined,
+		})
 	}
 
 	// dfs.
