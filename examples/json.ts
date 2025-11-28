@@ -14,6 +14,7 @@ import {
 	spanHighlighterStream,
 	braced,
 	bracketed,
+	enclosedBy,
 } from '../src/index'
 
 const matchNull = p('null', 'null')
@@ -21,8 +22,8 @@ const matchTrue = p('true', 'true')
 const matchFalse = p('false', 'false')
 const matchBoolean = p('boolean', either(matchTrue, matchFalse), true)
 
-const matchNumber = p('number', match(/^-?(0|[1-9]\d*)(\.\d+)?/))
-const matchString = p('string', seq('"', until('"'), '"'))
+const matchNumber = p('number', /^-?(0|[1-9]\d*)(\.\d+)?/)
+const matchString = p('string', enclosedBy(until('"'), '"'))
 
 const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
 
