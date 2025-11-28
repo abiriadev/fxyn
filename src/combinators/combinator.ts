@@ -128,6 +128,10 @@ export const separatedBy1 = wrapPatternLike(
 		seq(item, repeat0(seq(separator, item))),
 )
 
+export const enclosedBy = wrapPatternLike(
+	(inner: Pattern, outer: Pattern): Pattern => seq(outer, inner, outer),
+)
+
 // ()
 export const parenthesized = wrapPatternLike(
 	(inner: Pattern): Pattern => seq('(', inner, ')'),
