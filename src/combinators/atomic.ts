@@ -1,6 +1,7 @@
 import type { Pattern } from '@/pattern'
 import { newLeafSuccessResult } from '@/pattern-utils'
 import {
+	char,
 	charOneOf,
 	charRange,
 	charRangeRepeat0,
@@ -42,8 +43,16 @@ export const latinUpper = charRange('A', 'Z')
 
 export const latin = either(latinLower, latinUpper)
 
-export const crlf = either('\n', '\r\n')
+export const lf = char('\n')
 
-export const spaceTabLf0 = repeat0(charOneOf(' \t\n'))
+export const crlf = match('\r\n')
 
-export const spaceTabLf1 = repeat1(charOneOf(' \t\n'))
+export const nl = either(lf, crlf)
+
+export const spTabLf0 = repeat0(charOneOf(' \t\n'))
+
+export const spTabLf1 = repeat1(charOneOf(' \t\n'))
+
+export const spTabNl0 = repeat0(either(charOneOf(' \t'), nl))
+
+export const spTabNl1 = repeat1(either(charOneOf(' \t'), nl))
