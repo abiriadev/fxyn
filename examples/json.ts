@@ -12,6 +12,8 @@ import {
 	SpannedString,
 	renderMermaid,
 	spanHighlighterStream,
+	braced,
+	bracketed,
 } from '../src/index'
 
 const matchNull = p('null', 'null')
@@ -25,19 +27,16 @@ const matchString = p('string', seq('"', until('"'), '"'))
 const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
 
 const { matchArray, matchObject, matchValue, matchWsValue } = rec({
-	matchArray: $ =>
-		p('array', seq('[', separatedBy0($.matchWsValue, ','), ']')),
+	matchArray: $ => p('array', bracketed(separatedBy0($.matchWsValue, ','))),
 
 	matchObject: $ =>
 		p(
 			'object',
-			seq(
-				'{',
+			braced(
 				separatedBy0(
 					seq(ws, matchString, ws, ':', $.matchWsValue),
 					',',
 				),
-				'}',
 			),
 		),
 
