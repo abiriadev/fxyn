@@ -1,7 +1,9 @@
 import type { SpannedString } from './spanned-string'
 import type { Tree } from './tree'
 
-export type MatchResult = SuccessResult | null
+export type MatchResult = SuccessResult | ErrorResult
+
+export type ErrorResult = null
 
 export type SuccessResult = {
 	tree: Tree
