@@ -2,12 +2,22 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			// Run TypeScript directly using tsx (no build step)
 			"name": "example (Json)",
 			"type": "node",
 			"request": "launch",
 			"runtimeExecutable": "pnpm",
 			"runtimeArgs": ["tsx", "${workspaceFolder}/examples/json.ts"],
+			"cwd": "${workspaceFolder}",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen",
+			"skipFiles": ["<node_internals>/**"]
+		},
+		{
+			"name": "example (Wiki)",
+			"type": "node",
+			"request": "launch",
+			"runtimeExecutable": "pnpm",
+			"runtimeArgs": ["tsx", "${workspaceFolder}/examples/wiki.ts"],
 			"cwd": "${workspaceFolder}",
 			"console": "integratedTerminal",
 			"internalConsoleOptions": "neverOpen",
