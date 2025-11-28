@@ -26,6 +26,13 @@ export const p = (name: string, pattern: PatternLike, hidden = false) => {
 	return namedPattern
 }
 
+// similar to p, but used as a mapper function for Tree<T>
+export const pMap = (name: string) => (tree: Tree) => {
+	tree.name = name
+
+	return tree
+}
+
 // allow combinator to support `PatternLike` types, like raw string.
 export const wrapPatternLike =
 	<T extends Array<Pattern>, U>(combinator: (...patterns: T) => U) =>
