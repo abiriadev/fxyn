@@ -10,6 +10,7 @@ import {
 	until,
 	match,
 	spanHighlighterStream,
+	renderMermaid,
 } from '../src/index'
 
 const number = p('number', match(/^-?(0|[1-9]\d*)(\.\d+)?/))
@@ -46,5 +47,10 @@ const text = SpannedString.from(raw)
 const matched = valueWs(text)
 
 // console.log(displayMatchResult(match))
-console.log(spanHighlighterStream(matched)?.trim())
-// console.log(renderMermaid(matched)?.trim())
+// console.log(spanHighlighterStream(matched)?.trim())
+console.log(
+	renderMermaid({
+		...matched!,
+		tree: matched!.tree.projectToNamed(),
+	})?.trim(),
+)

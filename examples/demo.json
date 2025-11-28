@@ -30,7 +30,7 @@
 		},
 		{
 			"id": "user_002",
-			"name": "Diego Martinez",
+			"name": "Diego Martínez",
 			"email": "diego.martinez@example.com",
 			"createdAt": "2023-11-02T14:02:10Z",
 			"isActive": true,
@@ -191,7 +191,7 @@
 				"method": "Express",
 				"cost": 15.0,
 				"address": {
-					"line1": "Calle Gran Via 28",
+					"line1": "Calle Gran Vía 28",
 					"city": "Madrid",
 					"postalCode": "28013",
 					"country": "ES"

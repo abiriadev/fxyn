@@ -2,7 +2,6 @@ import { readFile } from 'node:fs/promises'
 import {
 	alt,
 	charOneOfRepeat0,
-	displayMatchResult,
 	either,
 	match,
 	p,
@@ -11,6 +10,8 @@ import {
 	seq,
 	until,
 	SpannedString,
+	renderMermaid,
+	spanHighlighterStream,
 } from '../src/index'
 
 const matchNull = p('null', 'null')
@@ -25,7 +26,7 @@ const ws = p('ws', charOneOfRepeat0('\n\r\t '), true)
 
 const { matchArray, matchObject, matchValue, matchWsValue } = rec({
 	matchArray: $ =>
-		p('array', seq('[', separatedBy0($.matchWsValue, seq(',')), ']')),
+		p('array', seq('[', separatedBy0($.matchWsValue, ','), ']')),
 
 	matchObject: $ =>
 		p(
@@ -58,10 +59,16 @@ const { matchArray, matchObject, matchValue, matchWsValue } = rec({
 })
 
 const jsonText = await readFile('./examples/demo.json', 'utf-8')
+// const jsonText = await readFile('./package.json', 'utf-8')
 
 const source = SpannedString.from(jsonText)
 
 const matchResult = matchWsValue(source)
 
-console.log(displayMatchResult(matchResult))
-// console.log(spanHighlighterStream(matchResult)?.trim())
+// console.log(displayMatchResult(matchResult))
+if (!matchResult) throw 1
+
+// console.log(
+// renderMermaid({ ...matchResult, tree: matchResult.tree.projectToNamed() }),
+// )
+console.log(spanHighlighterStream(matchResult)?.trim())
