@@ -128,6 +128,21 @@ export const separatedBy1 = wrapPatternLike(
 		seq(item, repeat0(seq(separator, item))),
 )
 
+// ()
+export const parenthesized = wrapPatternLike(
+	(inner: Pattern): Pattern => seq('(', inner, ')'),
+)
+
+// {}
+export const braced = wrapPatternLike(
+	(inner: Pattern): Pattern => seq('{', inner, '}'),
+)
+
+// []
+export const bracketed = wrapPatternLike(
+	(inner: Pattern): Pattern => seq('[', inner, ']'),
+)
+
 export const until =
 	(endsWith: string): Pattern =>
 	source => {
