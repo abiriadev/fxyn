@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.5.0 - 2025-11-28
+
+- Changed
+    - `Tree` now carries a generic metadata; `Tree` APIs (`newTree`/`newLeaf`/`iterators`/`projectToNamed`) were updated to accept/propagate meta.
+    - New modules: `combinators/atomic.ts` and `combinators/transform.ts`, containing atomic helpers and map helpers, respectively.
+    - New combinator helpers: `enclosedBy`, `parenthesized`, `braced`, `bracketed`, `assocLeft`/`assocRight`, `assocBinLeft`/`assocBinRight`, `assocBinLeftMap`/`assocBinRightMap`
+    - Added `pMap` to help naming trees by callback pattern.
+    - Regex are now treated as a `PatternLike` out of the box.
+    - `MatchResult` is now divided with two named types; same `SuccessResult` and newly added `ErrorResult`, which is basically a type alias for now.
+
 ## v0.4.0 - 2025-11-13
 
 - Breaking Changes
