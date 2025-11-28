@@ -136,15 +136,6 @@ export const until =
 		return newLeafSuccessResult(source, nextIndex)
 	}
 
-// matches to empty string
-export const empty: Pattern = source => newLeafSuccessResult(source, 0)
-
-export const eof: Pattern = source => {
-	if (source.isEmpty()) return newLeafSuccessResult(source, 0)
-
-	return null
-}
-
 export const lookahead = wrapPatternLike(
 	(pattern: Pattern, lookahead: Pattern): Pattern =>
 		source => {
