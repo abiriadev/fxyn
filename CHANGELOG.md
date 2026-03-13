@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1 - 2026-03-13
+
+- A quick patch bump to fix the npm version duplicate issue. This is the actual v0.5.0 release.
+
 ## v0.5.0 - 2025-11-28
 
 - Changed
